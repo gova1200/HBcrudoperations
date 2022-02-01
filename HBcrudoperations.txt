@@ -1,0 +1,114 @@
+package com.nt.test;
+
+import java.util.Scanner;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+import com.nt.entity.Product;
+
+public class SaveObjectTest {
+	public static void main(String[] args) {
+		Configuration cfg=new Configuration();
+		cfg.configure("com/nt/cfg/hibernate.cfg.xml");
+		SessionFactory factory=cfg.buildSessionFactory();
+		Session ses=factory.openSession();
+		Transaction tx=null;
+		Scanner sc=new Scanner(System.in);
+		String choice=null;
+		int key=0;
+		System.out.println("Enter your choice for \n1. INSERT \n 2.UPDATE \n 3.DELETE \n 4.SELECT");
+		key=sc.nextInt();
+		switch (key) {
+		case 1:
+			do {
+				try {
+				tx=ses.beginTransaction();
+		
+				Product pro=new Product();
+				System.out.println("enter product id::");
+				pro.setPid(sc.nextInt());
+				System.out.println("Enter product name::");
+				pro.setPname(sc.next());
+				System.out.println("Enter price of the product::");
+				pro.setPrice(sc.nextFloat());
+				System.out.println("Enter qunatity of products:::");
+				pro.setQty(sc.nextFloat());
+				ses.save(pro);
+				tx.commit();
+				System.out.println("Object is saved===Record inserted");
+				System.out.println("Do you want to insert another record then please click /'y/' other wise n");
+				choice=sc.next();
+				}//try
+				catch (HibernateException e) {
+					e.printStackTrace();
+					tx.rollback();
+					System.out.println("Not inserted...");
+				}//catch
+				
+			}//do
+			while(choice.equalsIgnoreCase("Y"));
+			break;
+		case 2:
+			do {
+			System.out.println("Enter Product Id");
+			Product pro=(Product)ses.load(Product.class, sc.nextInt());
+			if (pro!=null) {
+				System.out.println("Enter new price");
+				pro.setPrice(sc.nextFloat());
+				ses.update(pro);
+				ses.flush();
+				tx.commit();
+				System.out.println("====Update Success====");
+			}
+			else
+				System.out.println("===Not updated plz check====");
+			System.out.println("Enter do you want to update another record tooo then press y/n");
+			choice=sc.next();
+			}
+			while (choice.equalsIgnoreCase("y")); 
+			break;
+		case 3:
+			do {
+
+                                                                      tx=ses.beginTransaction();
+				System.out.println("Enter Product Id");
+				Product pro=(Product)ses.get(Product.class, sc.nextInt());
+				if (pro!=null) {				
+					ses.delete(pro);
+					ses.flush();
+					tx.commit();
+					System.out.println("====Delete Success====");
+				}
+				else
+					System.out.println("===Not deleted plz check====");
+				System.out.println("Do you want to delete another record then please press y/n");
+				choice=sc.next();
+			}
+			while (choice.equalsIgnoreCase("y"));
+			break;
+		case 4:
+			do{
+			System.out.println("Enter Product Id");
+			Product pro=(Product)ses.load(Product.class, sc.nextInt());
+			System.out.println("PID::"+pro.getPid());
+			System.out.println("Pname::"+pro.getPname());
+			System.out.println("Pprice::"+pro.getPrice());
+			System.out.println("Pqty::"+pro.getQty());
+			System.out.println("Do you want to check another then enter Y/N");
+			choice=sc.next();
+			}
+			while (choice.equalsIgnoreCase("y"));
+			break;
+			default:
+				System.out.println("Please select valid selection====");
+		}//switch
+		
+		ses.close();
+		factory.close();
+			
+	}//main
+}//class
